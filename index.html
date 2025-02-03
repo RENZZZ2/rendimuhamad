@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splitter TXT Nomor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .container:hover {
+            transform: scale(1.05);
+        }
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        #output {
+            margin-top: 15px;
+        }
+        a {
+            display: block;
+            margin-top: 5px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+        .loading {
+            display: none;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Splitter TXT Nomor</h2>
+        <input type="file" id="fileInput" accept=".txt">
+        <input type="number" id="jumlahPerFile" placeholder="Jumlah nomor per file">
+        <input type="text" id="namaFile" placeholder="Nama file (contoh: Baba)">
+        <button onclick="prosesFile()">Pisahkan</button>
+        <div class="loading" id="loading">Memproses file...</div>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function prosesFile() {
+            let fileInput = document.getElementById("fileInput").files[0];
+            let jumlahPerFile = parseInt(document.getElementById("jumlahPerFile").value);
+            let namaFile = document.getElementById("namaFile").value.trim();
+            let loading = document.getElementById("loading");
+    
+            if (!fileInput || isNaN(jumlahPerFile) || jumlahPerFile <= 0 || namaFile === "") {
+                alert("Harap isi semua kolom dengan benar!");
+                return;
+            }
+            
+            loading.style.display = "block";
+    
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let nomorList = e.target.result.split(/\r?\n/).map(line => line.trim()).filter(line => line !== "");
+                let totalFiles = Math.ceil(nomorList.length / jumlahPerFile);
+                let outputDiv = document.getElementById("output");
+                outputDiv.innerHTML = "";
+    
+                setTimeout(() => {
+                    for (let i = 0; i < totalFiles; i++) {
+                        let start = i * jumlahPerFile;
+                        let end = start + jumlahPerFile;
+                        let dataPerFile = nomorList.slice(start, end).join("\n");
+                        let fileName = `${namaFile} ${i + 1}.txt`;
+                        createDownloadLink(dataPerFile, fileName);
+                    }
+                    loading.style.display = "none";
+                }, 1000);
+            };
+            reader.readAsText(fileInput);
+        }
+    
+        function createDownloadLink(content, fileName) {
+            let blob = new Blob([content], { type: "text/plain" });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();  // Triggers the download automatically
+        }
+    </script>
+</body>
+</html>
